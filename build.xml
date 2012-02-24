@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF8" ?> 
+
+<project name="www1" basedir="." default="build" >
+
+  <target name="prepare" >
+	<delete dir="code-build" />
+	<mkdir dir="${project.basedir}/build" />
+	<mkdir dir="${project.basedir}/logs" />
+	<mkdir dir="${project.basedir}/code-browser" />
+	<mkdir dir="${project.basedir}/docblox" />
+	<mkdir dir="${project.basedir}/pdepend" />
+  </target>
+  
+  <target name="PHPCS" >
+     <exec executable="phpcs" >
+        <arg line="--report=checkstyle 
+                   --report-file=${project.basedir}/logs/checkstyle.xml
+                   --tab-width=4 
+                   --standard=Zend 
+		   --ignore=phpRack/**/*
+		   ${project.basedir}/library/" />
+     </exec>
+  </target>
+  
+  <target name="PHPCB" >
+    <exec executable="phpcb">
+	<arg line="--log ${project.basedir}/logs/
+                   --source ${project.basedir}/library/
+		   --output ${project.basedir}/code-browser/" />		    
+    </exec>
+  </target>
+  <target name="DOCBLOX" >
+  	<exec executable="docblox">
+		<arg line="--directory library
+			   --target ${project.basedir}/docblox/" />
+	</exec>
+  </target>
+
+  <target name="PHPCPD" >
+	<exec executable="phpcpd">
+		<arg line="--log-pmd ${project.basedir}/logs/pmd-cpd.xml
+		${project.basedir}/library" />
+	</exec>
+  </target>
+
+  <target name="PHPLOC">
+	<exec executable="phploc">
+		<arg line="--log-csv ${project.basedir}/logs/phploc.csv
+			  ${project.basedir}/library" />
+	</exec>
+  </target>
+
+  <target name="PHPMD">
+ 	<exec executable="phpmd">
+		<arg line="library xml codesize,unusedcode
+			   --reportfile ${project.basedir}/logs/pmd.xml" />
+	</exec>
+  </target>
+
+  <target name="PDEPEND">
+  	<exec executable="pdepend">
+		<arg line="--jdepend-xml=${project.basedir}/logs/jdepend.xml
+			   --jdepend-chart=${project.basedir}/pdepend/depend.svg
+			   --overview-pyramid=${project.basedir}/pdepend/overview.svg
+			   ${project.basedir}/library" />	
+	</exec>
+  </target>
+
+  <target name="PHPUNIT">
+        <exec dir="tests/unit" executable="phpunit">
+		<arg line="MainTest" />
+	</exec>	
+  </target>
+
+  <target name="build" depends="prepare,PHPCPD,PHPMD,PHPCS,PHPUNIT,
+				PHPCB,PHPLOC,DOCBLOX,PDEPEND" />
+    
+ </project>
+
